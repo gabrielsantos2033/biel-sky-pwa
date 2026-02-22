@@ -1,144 +1,91 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BIEL Sky</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIEL Sky</title>
 
-<style>
-body{
-  margin:0;
-  background:#0b1220;
-  color:#e6edf3;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-}
+  <style>
+    body{
+      margin:0;
+      background:#0b1220;
+      color:#e6edf3;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+    }
 
-/* LOGIN */
-#login{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#0b1220;
-  z-index:1000;
-}
+    #login{
+      position:fixed;
+      inset:0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#0b1220;
+      z-index:1000;
+    }
 
-.hidden{display:none;}
+    .hidden{display:none;}
 
-.login-box{
-  background:#111827;
-  padding:30px;
-  border-radius:20px;
-  width:100%;
-  max-width:360px;
-  border:1px solid #1f2937;
-}
+    .login-box{
+      background:#111827;
+      padding:30px;
+      border-radius:20px;
+      width:100%;
+      max-width:360px;
+      border:1px solid #1f2937;
+    }
 
-input{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #1f2937;
-  background:#0f172a;
-  color:white;
-  margin-bottom:12px;
-}
+    input{
+      width:100%;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid #1f2937;
+      background:#0f172a;
+      color:white;
+      margin-bottom:12px;
+    }
 
-button.primary{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  background:#2563eb;
-  border:none;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-}
+    button.primary{
+      width:100%;
+      padding:12px;
+      border-radius:8px;
+      background:#2563eb;
+      border:none;
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+    }
 
-header{
-  position:fixed;
-  top:0;
-  width:100%;
-  background:#0b1220;
-  border-bottom:1px solid #1f2937;
-  padding:16px;
-  font-weight:600;
-  z-index:10;
-}
+    header{
+      position:fixed;
+      top:0;
+      width:100%;
+      background:#0b1220;
+      border-bottom:1px solid #1f2937;
+      padding:16px;
+      font-weight:600;
+      z-index:10;
+    }
 
-main{
-  padding-top:70px;
-  padding-bottom:80px;
-  max-width:650px;
-  margin:auto;
-}
+    main{
+      padding-top:70px;
+      padding-bottom:80px;
+      max-width:650px;
+      margin:auto;
+    }
 
-.post{
-  padding:16px;
-  border-bottom:1px solid #1f2937;
-  display:flex;
-  gap:12px;
-}
+    nav{
+      position:fixed;
+      bottom:0;
+      width:100%;
+      background:#0b1220;
+      border-top:1px solid #1f2937;
+      display:flex;
+      justify-content:space-around;
+      padding:12px 0;
+    }
 
-.avatar{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  cursor:pointer;
-  object-fit:cover;
-}
-
-.post-body{flex:1;}
-
-.post-top{
-  display:flex;
-  gap:6px;
-  align-items:center;
-}
-
-.handle{color:#9ca3af;}
-
-.date{
-  margin-left:auto;
-  font-size:12px;
-  color:#6b7280;
-}
-
-.post-image{
-  width:100%;
-  border-radius:14px;
-  margin-top:10px;
-}
-
-.actions{
-  display:flex;
-  gap:25px;
-  margin-top:10px;
-}
-
-.action{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  cursor:pointer;
-  color:#9ca3af;
-}
-
-.action:hover{color:#3b82f6;}
-
-nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:#0b1220;
-  border-top:1px solid #1f2937;
-  display:flex;
-  justify-content:space-around;
-  padding:12px 0;
-}
-svg{width:20px;height:20px;}
-</style>
+    svg{width:20px;height:20px;}
+  </style>
 </head>
 <body>
 
@@ -155,117 +102,11 @@ svg{width:20px;height:20px;}
 <main id="app"></main>
 
 <nav>
-<button onclick="loadHome()">Home</button>
-<button onclick="loadProfile()">Profile</button>
+  <button onclick="loadHome()">Home</button>
+  <button onclick="loadProfile()">Profile</button>
 </nav>
 
-<script src="https://esm.sh/@atproto/api?bundle"></script>
-
-<script>
-let agent
-
-async function doLogin(){
-  const handle=document.getElementById("handle").value
-  const password=document.getElementById("password").value
-
-  agent = new atproto.BskyAgent({ service:"https://bsky.social" })
-
-  await agent.login({ identifier:handle, password })
-
-  document.getElementById("login").classList.add("hidden")
-
-  loadHome()
-}
-
-function formatDate(d){
-  return new Date(d).toLocaleDateString("pt-BR")
-}
-
-function renderImages(embed){
-  if(!embed || !embed.images) return ""
-  return embed.images.map(img=>`<img class="post-image" src="${img.fullsize}">`).join("")
-}
-
-async function loadHome(){
-  const res=await agent.getTimeline()
-  const app=document.getElementById("app")
-  app.innerHTML=""
-
-  res.data.feed.forEach(item=>{
-    const p=item.post
-
-    app.innerHTML+=`
-      <div class="post">
-        <img class="avatar" src="${p.author.avatar||''}" onclick="loadProfile('${p.author.did}')">
-        <div class="post-body">
-          <div class="post-top">
-            <strong>${p.author.displayName||""}</strong>
-            <span class="handle">@${p.author.handle}</span>
-            <span class="date">${formatDate(p.record.createdAt)}</span>
-          </div>
-          <div>${p.record.text||""}</div>
-          ${renderImages(p.record.embed)}
-          <div class="actions">
-            <div class="action" onclick="likePost('${p.uri}','${p.cid}')">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21C12 21 4 13 4 8a4 4 0 018 0 4 4 0 018 0c0 5-8 13-8 13z"/>
-              </svg>
-              ${p.likeCount||0}
-            </div>
-            <div class="action" onclick="repostPost('${p.uri}','${p.cid}')">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M17 1l4 4-4 4"/>
-                <path d="M3 11V9a4 4 0 014-4h14"/>
-              </svg>
-              ${p.repostCount||0}
-            </div>
-            <div class="action">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M21 15a4 4 0 01-4 4H7l-4 4V5a4 4 0 014-4h10a4 4 0 014 4z"/>
-              </svg>
-              ${p.replyCount||0}
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  })
-}
-
-async function loadProfile(did){
-  const profile=await agent.getProfile({actor:did||agent.session.did})
-  const feed=await agent.getAuthorFeed({actor:did||agent.session.did})
-
-  const app=document.getElementById("app")
-
-  app.innerHTML=`
-    <div style="padding:20px;border-bottom:1px solid #1f2937">
-      <img src="${profile.data.avatar||''}" style="width:80px;border-radius:50%">
-      <h2>${profile.data.displayName||""}</h2>
-      <p>@${profile.data.handle}</p>
-      <p>${profile.data.description||""}</p>
-    </div>
-  `
-
-  feed.data.feed.forEach(item=>{
-    app.innerHTML+=`
-      <div class="post">
-        <div>${item.post.record.text}</div>
-      </div>
-    `
-  })
-}
-
-async function likePost(uri,cid){
-  await agent.like({subject:{uri,cid}})
-  loadHome()
-}
-
-async function repostPost(uri,cid){
-  await agent.repost({subject:{uri,cid}})
-  loadHome()
-}
-</script>
+<script type="module" src="/js/main.js"></script>
 
 </body>
 </html>
