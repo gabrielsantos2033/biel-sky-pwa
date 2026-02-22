@@ -1,47 +1,59 @@
-import {getAgent} from "./api.js"
-import {like,repost} from "./post.js"
-import {router} from "./router.js"
+import { getAgent } from "./api.js"
+import { like, repost } from "./post.js"
+import { router } from "./router.js"
 
-function formatDate(date){
+function formatDate(date) {
   return new Date(date).toLocaleDateString("pt-BR")
 }
 
-export async function renderHome(){
-  const agent=getAgent()
-  const res=await agent.getTimeline()
-  const app=document.getElementById("app")
-  app.innerHTML=""
+export async function renderHome() {
 
-  res.data.feed.forEach(item=>{
-    const p=item.post
+  const agent = getAgent()
+  const res = await agent.getTimeline()
+  const app = document.getElementById("app")
+  app.innerHTML = ""
 
-    const card=document.createElement("div")
-    card.className="card"
+  res.data.feed.forEach(item => {
 
-    card.innerHTML=`
-    <div class="post">
-      <img class="avatar" src="${p.author.avatar||''}">
-      <div class="post-body">
-        <div class="post-top">
-          <strong>${p.author.displayName||""}</strong>
-          <span class="handle">@${p.author.handle}</span>
-          <span class="date">${formatDate(p.record.createdAt)}</span>
-        </div>
+    const p = item.post
 
-        <div class="post-text">${p.record.text}</div>
+    const card = document.createElement("div")
+    card.className = "card"
 
-        <div class="actions">
-          <button class="action-btn">💬 ${p.replyCount||0}</button>
-          <button class="action-btn repost">${p.repostCount||0}</button>
-          <button class="action-btn like">${p.likeCount||0}</button>
+    card.innerHTML = `
+      <div class="post">
+        <img class="avatar" src="${p.author.avatar || ''}">
+        <div class="post-body">
+
+          <div class="post-top">
+            <strong>${p.author.displayName || ""}</strong>
+            <span class="handle">@${p.author.handle}</span>
+            <span class="date">${formatDate(p.record.createdAt)}</span>
+          </div>
+
+          <div class="post-text">
+            ${p.record.text || ""}
+          </div>
+
+          <div class="actions">
+            <button class="action-btn">💬 ${p.replyCount || 0}</button>
+            <button class="action-btn repost">${p.repostCount || 0}</button>
+            <button class="action-btn like">${p.likeCount || 0}</button>
+          </div>
+
         </div>
       </div>
-    </div>
     `
+
     app.appendChild(card)
 
-    card.querySelector(".avatar").onclick=()=>router.go("profile",p.author.did)
-    card.querySelector(".repost").onclick=()=>repost(p.uri,p.cid)
-    card.querySelector(".like").onclick=()=>like(p.uri,p.cid)
+    card.querySelector(".avatar").onclick =
+      () => router.go("profile", p.author.did)
+
+    card.querySelector(".repost").onclick =
+      () => repost(p.uri, p.cid)
+
+    card.querySelector(".like").onclick =
+      () => like(p.uri, p.cid)
   })
 }
