@@ -3,31 +3,54 @@ import { BskyAgent } from "https://esm.sh/@atproto/api?bundle"
 let agent = null
 
 window.doLogin = async function () {
-  const handle = document.getElementById("handle").value
-  const password = document.getElementById("password").value
+  const handleInput = document.getElementById("handle")
+  const passwordInput = document.getElementById("password")
+
+  const handle = handleInput.value.trim()
+  const password = passwordInput.value.trim()
+
+  if (!handle || !password) {
+    alert("Preencha usuário e app password.")
+    return
+  }
 
   try {
     agent = new BskyAgent({
       service: "https://bsky.social"
     })
 
-    await agent.login({
+    const loginResponse = await agent.login({
       identifier: handle,
       password: password
     })
 
+    if (!loginResponse.success) {
+      alert("Login falhou.")
+      return
+    }
+
+    if (!agent.session || !agent.session.accessJwt) {
+      alert("Sessão não criada corretamente.")
+      return
+    }
+
+    console.log("Login OK:", agent.session)
+
     document.getElementById("login").classList.add("hidden")
 
-    loadHome()
+    await loadHome()
 
   } catch (err) {
-    alert("Erro no login: " + err.message)
-    console.error(err)
+    console.error("Erro no login:", err)
+    alert("Erro de autenticação. Verifique handle completo e app password.")
   }
 }
 
 window.loadHome = async function () {
-  if (!agent) return
+  if (!agent || !agent.session) {
+    console.log("Sem sessão válida.")
+    return
+  }
 
   const app = document.getElementById("app")
   app.innerHTML = "Carregando..."
@@ -50,32 +73,7 @@ window.loadHome = async function () {
     })
 
   } catch (err) {
-    console.error(err)
-    app.innerHTML = "Erro ao carregar feed."
-  }
-}
-
-window.loadProfile = async function () {
-  if (!agent) return
-
-  const app = document.getElementById("app")
-  app.innerHTML = "Carregando perfil..."
-
-  try {
-    const res = await agent.getProfile({
-      actor: agent.session.did
-    })
-
-    app.innerHTML = `
-      <div style="padding:20px">
-        <h2>${res.data.displayName || ""}</h2>
-        <p style="color:#9ca3af">@${res.data.handle}</p>
-        <p>${res.data.description || ""}</p>
-      </div>
-    `
-
-  } catch (err) {
-    console.error(err)
-    app.innerHTML = "Erro ao carregar perfil."
+    console.error("Erro timeline:", err)
+    app.innerHTML = "Erro 401. Sessão inválida."
   }
 }
