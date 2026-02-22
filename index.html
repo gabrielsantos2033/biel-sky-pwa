@@ -4,7 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>BIEL Sky</title>
+
 <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css">
+
 <style>
 body{
   background:#0b1220;
@@ -21,6 +23,7 @@ header{
   padding:15px;
   font-weight:600;
   border-bottom:1px solid #1f2937;
+  z-index:10;
 }
 
 main{
@@ -82,7 +85,7 @@ nav{
   padding:10px 0;
 }
 
-input,select{
+input{
   width:100%;
   padding:10px;
   border-radius:8px;
@@ -96,18 +99,14 @@ input,select{
 <body>
 
 <header>BIEL Sky</header>
-
 <main id="app"></main>
 
 <nav>
 <button onclick="router.go('home')">Home</button>
 <button onclick="router.go('discover')">Discover</button>
 <button onclick="router.go('search')">Search</button>
-<button onclick="router.go('notifications')">Alerts</button>
 <button onclick="router.go('profile')">Profile</button>
 </nav>
-
-<script src="https://unpkg.com/@atproto/api/dist/browser/index.js"></script>
 
 <script type="module" src="./js/app.js"></script>
 
