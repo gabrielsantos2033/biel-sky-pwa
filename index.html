@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIEL Sky Ultra</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#0f0f14;
+  color:white;
+}
+
+header{
+  padding:15px;
+  font-size:22px;
+  font-weight:bold;
+  text-align:center;
+  background:linear-gradient(90deg,#0ea5ff,#7c3aed);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.container{
+  padding:15px;
+}
+
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:12px;
+  border:none;
+  background:#1a1a22;
+  color:white;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  background:linear-gradient(90deg,#0ea5ff,#7c3aed);
+  color:white;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:6px;
+  margin-top:15px;
+}
+
+.grid img{
+  width:100%;
+  height:110px;
+  object-fit:cover;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>BIEL Sky Ultra</header>
+
+<div class="container">
+
+<h3>Login</h3>
+<input id="handle" placeholder="usuario.bsky.social">
+<input id="password" type="password" placeholder="App Password">
+<button onclick="login()">Entrar</button>
+
+<hr style="margin:20px 0;border-color:#222;">
+
+<h3>Nova Postagem</h3>
+<textarea id="text" placeholder="Escreva algo..."></textarea>
+<input type="file" id="imageInput">
+<button onclick="post()">Publicar</button>
+
+<div class="grid" id="grid"></div>
+
+</div>
+
+<script type="module">
+import { BskyAgent } from "https://esm.sh/@atproto/api";
+
+let agent;
+
+window.login = async function(){
+  agent = new BskyAgent({ service: "https://bsky.social" });
+  await agent.login({
+    identifier: document.getElementById("handle").value,
+    password: document.getElementById("password").value
+  });
+  alert("Login realizado 🚀");
+  loadFeed();
+};
+
+async function loadFeed(){
+  const profile = await agent.getProfile({ actor: agent.session.did });
+  const feed = await agent.getAuthorFeed({ actor: profile.data.handle });
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  feed.data.feed.forEach(post=>{
+    if(post.post.embed?.images){
+      post.post.embed.images.forEach(img=>{
+        const image = document.createElement("img");
+        image.src = img.fullsize;
+        grid.appendChild(image);
+      });
+    }
+  });
+}
+
+window.post = async function(){
+  const text = document.getElementById("text").value;
+  const file = document.getElementById("imageInput").files[0];
+
+  if(!agent) return alert("Faça login primeiro");
+
+  if(file){
+    const arrayBuffer = await file.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: file.type });
+
+    const upload = await agent.uploadBlob(blob);
+
+    await agent.post({
+      text,
+      embed:{
+        $type:"app.bsky.embed.images",
+        images:[{
+          alt:"imagem",
+          image: upload.data.blob
+        }]
+      }
+    });
+
+  }else{
+    await agent.post({ text });
+  }
+
+  alert("Publicado 🔥");
+  loadFeed();
+};
+</script>
+
+</body>
+</html>
