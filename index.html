@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIEL Sky</title>
 
-<link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css">
-
 <style>
 body{
+  margin:0;
   background:#0b1220;
   color:#e6edf3;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
@@ -22,10 +21,10 @@ body{
   justify-content:center;
   align-items:center;
   background:#0b1220;
-  z-index:999;
+  z-index:1000;
 }
 
-.hidden{ display:none !important; }
+.hidden{display:none;}
 
 .login-box{
   background:#111827;
@@ -75,13 +74,9 @@ main{
   margin:auto;
 }
 
-/* POSTS */
-.post-card{
+.post{
   padding:16px;
   border-bottom:1px solid #1f2937;
-}
-
-.post{
   display:flex;
   gap:12px;
 }
@@ -90,33 +85,24 @@ main{
   width:44px;
   height:44px;
   border-radius:50%;
-  object-fit:cover;
   cursor:pointer;
+  object-fit:cover;
 }
 
-.post-body{
-  flex:1;
-}
+.post-body{flex:1;}
 
 .post-top{
   display:flex;
-  align-items:center;
   gap:6px;
+  align-items:center;
 }
 
-.handle{
-  color:#9ca3af;
-}
+.handle{color:#9ca3af;}
 
 .date{
   margin-left:auto;
-  font-size:13px;
+  font-size:12px;
   color:#6b7280;
-}
-
-.post-text{
-  margin:8px 0;
-  line-height:1.5;
 }
 
 .post-image{
@@ -131,19 +117,15 @@ main{
   margin-top:10px;
 }
 
-.action-btn{
+.action{
   display:flex;
-  align-items:center;
   gap:6px;
-  background:none;
-  border:none;
-  color:#9ca3af;
+  align-items:center;
   cursor:pointer;
+  color:#9ca3af;
 }
 
-.action-btn:hover{
-  color:#3b82f6;
-}
+.action:hover{color:#3b82f6;}
 
 nav{
   position:fixed;
@@ -155,9 +137,9 @@ nav{
   justify-content:space-around;
   padding:12px 0;
 }
+svg{width:20px;height:20px;}
 </style>
 </head>
-
 <body>
 
 <div id="login">
@@ -173,11 +155,117 @@ nav{
 <main id="app"></main>
 
 <nav>
-<button onclick="router.go('home')">Home</button>
-<button onclick="router.go('search')">Search</button>
-<button onclick="router.go('profile')">Profile</button>
+<button onclick="loadHome()">Home</button>
+<button onclick="loadProfile()">Profile</button>
 </nav>
 
-<script type="module" src="./js/app.js"></script>
+<script src="https://esm.sh/@atproto/api?bundle"></script>
+
+<script>
+let agent
+
+async function doLogin(){
+  const handle=document.getElementById("handle").value
+  const password=document.getElementById("password").value
+
+  agent = new atproto.BskyAgent({ service:"https://bsky.social" })
+
+  await agent.login({ identifier:handle, password })
+
+  document.getElementById("login").classList.add("hidden")
+
+  loadHome()
+}
+
+function formatDate(d){
+  return new Date(d).toLocaleDateString("pt-BR")
+}
+
+function renderImages(embed){
+  if(!embed || !embed.images) return ""
+  return embed.images.map(img=>`<img class="post-image" src="${img.fullsize}">`).join("")
+}
+
+async function loadHome(){
+  const res=await agent.getTimeline()
+  const app=document.getElementById("app")
+  app.innerHTML=""
+
+  res.data.feed.forEach(item=>{
+    const p=item.post
+
+    app.innerHTML+=`
+      <div class="post">
+        <img class="avatar" src="${p.author.avatar||''}" onclick="loadProfile('${p.author.did}')">
+        <div class="post-body">
+          <div class="post-top">
+            <strong>${p.author.displayName||""}</strong>
+            <span class="handle">@${p.author.handle}</span>
+            <span class="date">${formatDate(p.record.createdAt)}</span>
+          </div>
+          <div>${p.record.text||""}</div>
+          ${renderImages(p.record.embed)}
+          <div class="actions">
+            <div class="action" onclick="likePost('${p.uri}','${p.cid}')">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21C12 21 4 13 4 8a4 4 0 018 0 4 4 0 018 0c0 5-8 13-8 13z"/>
+              </svg>
+              ${p.likeCount||0}
+            </div>
+            <div class="action" onclick="repostPost('${p.uri}','${p.cid}')">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M17 1l4 4-4 4"/>
+                <path d="M3 11V9a4 4 0 014-4h14"/>
+              </svg>
+              ${p.repostCount||0}
+            </div>
+            <div class="action">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M21 15a4 4 0 01-4 4H7l-4 4V5a4 4 0 014-4h10a4 4 0 014 4z"/>
+              </svg>
+              ${p.replyCount||0}
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  })
+}
+
+async function loadProfile(did){
+  const profile=await agent.getProfile({actor:did||agent.session.did})
+  const feed=await agent.getAuthorFeed({actor:did||agent.session.did})
+
+  const app=document.getElementById("app")
+
+  app.innerHTML=`
+    <div style="padding:20px;border-bottom:1px solid #1f2937">
+      <img src="${profile.data.avatar||''}" style="width:80px;border-radius:50%">
+      <h2>${profile.data.displayName||""}</h2>
+      <p>@${profile.data.handle}</p>
+      <p>${profile.data.description||""}</p>
+    </div>
+  `
+
+  feed.data.feed.forEach(item=>{
+    app.innerHTML+=`
+      <div class="post">
+        <div>${item.post.record.text}</div>
+      </div>
+    `
+  })
+}
+
+async function likePost(uri,cid){
+  await agent.like({subject:{uri,cid}})
+  loadHome()
+}
+
+async function repostPost(uri,cid){
+  await agent.repost({subject:{uri,cid}})
+  loadHome()
+}
+</script>
+
 </body>
 </html>
