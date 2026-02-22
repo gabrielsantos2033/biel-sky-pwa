@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIEL Sky</title>
 
 <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css">
@@ -14,19 +14,58 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 }
 
-.hidden{display:none;}
+/* LOGIN */
+#login{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0b1220;
+  z-index:999;
+}
+
+.hidden{ display:none !important; }
+
+.login-box{
+  background:#111827;
+  padding:30px;
+  border-radius:20px;
+  width:100%;
+  max-width:360px;
+  border:1px solid #1f2937;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #1f2937;
+  background:#0f172a;
+  color:white;
+  margin-bottom:12px;
+}
+
+button.primary{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  background:#2563eb;
+  border:none;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
 
 header{
   position:fixed;
   top:0;
   width:100%;
-  backdrop-filter:blur(12px);
-  background:rgba(11,18,32,.7);
+  background:#0b1220;
+  border-bottom:1px solid #1f2937;
   padding:16px;
   font-weight:600;
-  font-size:18px;
-  border-bottom:1px solid #1f2937;
-  z-index:100;
+  z-index:10;
 }
 
 main{
@@ -36,12 +75,10 @@ main{
   margin:auto;
 }
 
-.card{
-  background:#111827;
-  border:1px solid #1f2937;
-  border-radius:16px;
-  padding:15px;
-  margin-bottom:14px;
+/* POSTS */
+.post-card{
+  padding:16px;
+  border-bottom:1px solid #1f2937;
 }
 
 .post{
@@ -69,7 +106,6 @@ main{
 
 .handle{
   color:#9ca3af;
-  font-size:14px;
 }
 
 .date{
@@ -83,22 +119,26 @@ main{
   line-height:1.5;
 }
 
+.post-image{
+  width:100%;
+  border-radius:14px;
+  margin-top:10px;
+}
+
 .actions{
   display:flex;
-  justify-content:space-between;
-  margin-top:8px;
-  max-width:260px;
+  gap:25px;
+  margin-top:10px;
 }
 
 .action-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
   background:none;
   border:none;
   color:#9ca3af;
   cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:5px;
-  font-size:14px;
 }
 
 .action-btn:hover{
@@ -115,102 +155,28 @@ nav{
   justify-content:space-around;
   padding:12px 0;
 }
-
-.nav-btn{
-  background:none;
-  border:none;
-  color:#9ca3af;
-  cursor:pointer;
-}
-
-.nav-btn.active{
-  color:#3b82f6;
-}
-
-svg{
-  width:22px;
-  height:22px;
-}
-
-#login{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.login-box{
-  background:#111827;
-  padding:30px;
-  border-radius:20px;
-  width:100%;
-  max-width:350px;
-  border:1px solid #1f2937;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #1f2937;
-  background:#0f172a;
-  color:white;
-  margin-bottom:12px;
-}
-
-button.primary{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  background:#2563eb;
-  border:none;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-}
-
-button.primary:hover{
-  background:#1d4ed8;
-}
 </style>
 </head>
+
 <body>
 
 <div id="login">
   <div class="login-box">
     <h2>BIEL Sky</h2>
-    <input id="handle" placeholder="Usuário Bluesky">
+    <input id="handle" placeholder="Usuário">
     <input id="password" type="password" placeholder="App Password">
     <button class="primary" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
-<div id="appContainer" class="hidden">
 <header>BIEL Sky</header>
 <main id="app"></main>
 
 <nav>
-<button class="nav-btn" onclick="router.go('home')">
-<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path d="M3 10l9-7 9 7v11H3z"/>
-</svg>
-</button>
-
-<button class="nav-btn" onclick="router.go('search')">
-<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<circle cx="11" cy="11" r="7"/>
-<line x1="21" y1="21" x2="16.6" y2="16.6"/>
-</svg>
-</button>
-
-<button class="nav-btn" onclick="router.go('profile')">
-<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<circle cx="12" cy="7" r="4"/>
-<path d="M5.5 21a7.5 7.5 0 0113 0"/>
-</svg>
-</button>
+<button onclick="router.go('home')">Home</button>
+<button onclick="router.go('search')">Search</button>
+<button onclick="router.go('profile')">Profile</button>
 </nav>
-</div>
 
 <script type="module" src="./js/app.js"></script>
 </body>
