@@ -1,11 +1,18 @@
 import {login} from "./api.js"
 import {router} from "./router.js"
 
-const handle=prompt("Seu usuário Bluesky")
-const password=prompt("Senha (App Password recomendado)")
+window.doLogin = async function(){
+  const handle=document.getElementById("handle").value
+  const password=document.getElementById("password").value
 
-await login(handle,password)
+  if(!handle || !password) return alert("Preencha tudo")
 
-router.go("home")
+  await login(handle,password)
+
+  document.getElementById("login").classList.add("hidden")
+  document.getElementById("appContainer").classList.remove("hidden")
+
+  router.go("home")
+}
 
 window.router=router
