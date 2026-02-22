@@ -1,9 +1,66 @@
-{
-  "name": "BIEL Sky Ultra",
-  "short_name": "BIEL Sky",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#0f0f14",
-  "theme_color": "#0ea5ff",
-  "icons": []
+import { BskyAgent } from "https://esm.sh/@atproto/api?bundle"
+
+let agent
+
+window.doLogin = async function () {
+  const handle = document.getElementById("handle").value
+  const password = document.getElementById("password").value
+
+  try {
+    agent = new BskyAgent({ service: "https://bsky.social" })
+
+    await agent.login({
+      identifier: handle,
+      password
+    })
+
+    document.getElementById("login").classList.add("hidden")
+    loadHome()
+
+  } catch (err) {
+    alert("Erro no login: " + err.message)
+  }
+}
+
+window.loadHome = async function () {
+  try {
+    const res = await agent.getTimeline()
+    const app = document.getElementById("app")
+    app.innerHTML = ""
+
+    res.data.feed.forEach(item => {
+      const p = item.post
+
+      app.innerHTML += `
+        <div style="padding:16px;border-bottom:1px solid #1f2937">
+          <strong>${p.author.displayName || ""}</strong>
+          <div>@${p.author.handle}</div>
+          <p>${p.record.text || ""}</p>
+        </div>
+      `
+    })
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+window.loadProfile = async function () {
+  try {
+    const res = await agent.getProfile({
+      actor: agent.session.did
+    })
+
+    const app = document.getElementById("app")
+
+    app.innerHTML = `
+      <div style="padding:20px">
+        <h2>${res.data.displayName || ""}</h2>
+        <p>@${res.data.handle}</p>
+        <p>${res.data.description || ""}</p>
+      </div>
+    `
+  } catch (err) {
+    console.error(err)
+  }
 }
